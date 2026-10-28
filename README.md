@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Automated Invoice Processing and Anomaly Detection
 
 ## Overview
@@ -905,3 +906,6 @@ to `output/ocr_setup_check.csv`: Tesseract was absent at that checkpoint (it is 
 integration tests remain skipped; real recognition accuracy is not verified.
 Install/configure the executable as described above to complete that check.
 Historical note: validation and ML were unimplemented at that early checkpoint; both are implemented now.
+=======
+# Automated-Invoice-Processing-and-Anomaly-Detection
+>>>>>>> 4d21f48b2559af158266446210a63685059ece2d
