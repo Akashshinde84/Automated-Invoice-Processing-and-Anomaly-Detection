@@ -9,9 +9,9 @@ import pytest
 
 import anomaly_detector
 from anomaly_detector import features, load_model, ml_result, save_model, train_model
-from phase2 import analyze_invoices, priority_for_score, read_records, main as phase2_main
-from phase21 import binary_metrics, evaluate, evaluation_boolean, run_verification, verification_data
-from phase2_config import AnalysisConfig
+from invoice_analysis import analyze_invoices, priority_for_score, read_records, main as analysis_main
+from model_evaluation import binary_metrics, evaluate, evaluation_boolean, run_verification, verification_data
+from analysis_config import AnalysisConfig
 from validator import normalized, validate_record
 
 CONFIG = AnalysisConfig(as_of='2026-10-29')
@@ -19,7 +19,7 @@ CONFIG = AnalysisConfig(as_of='2026-10-29')
 
 @pytest.fixture(scope='module')
 def verification(tmp_path_factory):
-    root = tmp_path_factory.mktemp('phase21')
+    root = tmp_path_factory.mktemp('model_evaluation')
     metrics = run_verification(root/'evaluation', root/'vendor.joblib', CONFIG)
     return root, metrics
 
@@ -123,7 +123,7 @@ def test_legacy_profile_and_artifacts_remain_supported(verification):
     root, _ = verification
     baseline = load_model(root/'vendor_numeric_baseline.joblib')
     assert baseline['features'] == anomaly_detector.FEATURES
-    # Old Phase 2 artifacts do not carry feature_profile metadata.
+    # Older numeric-model artifacts do not carry feature_profile metadata.
     baseline.pop('feature_profile')
     path = root/'legacy.joblib'
     save_model(baseline, path)
@@ -194,6 +194,6 @@ def test_saved_model_selection_in_dashboard_and_export_fields(verification, tmp_
 def test_cli_optional_profile_can_be_trained_and_loaded(verification, tmp_path):
     root, _ = verification
     path = tmp_path/'cli_vendor.joblib'
-    assert phase2_main(['train', str(root/'evaluation/synthetic_training.csv'), '--model', str(path),
+    assert analysis_main(['train', str(root/'evaluation/synthetic_training.csv'), '--model', str(path),
                         '--kind', 'synthetic_demo', '--feature-profile', 'vendor_v2', '--as-of', CONFIG.as_of]) == 0
     assert load_model(path)['schema_version'] == 2

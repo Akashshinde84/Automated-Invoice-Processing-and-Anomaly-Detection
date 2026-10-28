@@ -1,4 +1,4 @@
-"""Phase 2 validation, matching, risk, ML and CLI integration regressions."""
+"""Invoice validation, matching, risk, ML and CLI integration regressions."""
 from copy import deepcopy
 from dataclasses import replace
 from decimal import Decimal
@@ -12,8 +12,8 @@ import pytest
 from anomaly_detector import features, load_model, save_model, train_model
 from duplicate_detector import detect_duplicates
 from parser import parse_invoice
-from phase2 import ANALYSIS_COLUMNS, analyze_invoices, demo_data, main, read_records, write_analysis
-from phase2_config import AnalysisConfig
+from invoice_analysis import ANALYSIS_COLUMNS, analyze_invoices, demo_data, main, read_records, write_analysis
+from analysis_config import AnalysisConfig
 from validator import money, validate_invoice, validate_record
 
 CONFIG = AnalysisConfig(as_of='2026-10-29')
@@ -235,7 +235,7 @@ def test_analysis_preserves_original_columns_index_and_values():
 
 
 def test_input_schema_and_reanalysis_protection():
-    with pytest.raises(ValueError, match='Missing Phase 1'):
+    with pytest.raises(ValueError, match='Missing extracted invoice'):
         analyze_invoices(pd.DataFrame({'total_amount': ['100']}), CONFIG)
     with pytest.raises(ValueError, match='already contains analysis'):
         analyze_invoices(analyze([record()]), CONFIG)
@@ -369,7 +369,7 @@ def test_training_repeated_source_identity_not_counted(trained_demo):
         train_model(copied, CONFIG, training_kind='synthetic_demo')
 
 
-def test_phase1_real_ocr_csv_feeds_phase2_without_losing_review(tmp_path, trained_demo):
+def test_real_ocr_csv_feeds_analysis_without_losing_review(tmp_path, trained_demo):
     from ocr_engine import configure_tesseract, TesseractNotFoundError
     from pipeline import discover_sources, run_pipeline
     try:
@@ -377,7 +377,7 @@ def test_phase1_real_ocr_csv_feeds_phase2_without_losing_review(tmp_path, traine
     except TesseractNotFoundError as exc:
         pytest.skip(str(exc))
     root = Path(__file__).resolve().parents[1]/'samples/phase3'
-    extraction = run_pipeline(discover_sources(root), csv_path=tmp_path/'phase1.csv',
+    extraction = run_pipeline(discover_sources(root), csv_path=tmp_path/'extracted_invoices.csv',
                               processed_dir=tmp_path/'processed', raw_dir=tmp_path/'raw')
     assert len(extraction) == 4
     analyzed = analyze_invoices(extraction, CONFIG, trained_demo[2])

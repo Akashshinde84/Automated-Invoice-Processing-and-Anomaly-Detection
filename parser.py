@@ -19,7 +19,7 @@ class LineItem:
 
     @property
     def line_total(self) -> Decimal | None:
-        """Keep the phase-one amount attribute compatible with callers."""
+        """Keep the amount attribute compatible with existing callers."""
         return self.amount
 
 

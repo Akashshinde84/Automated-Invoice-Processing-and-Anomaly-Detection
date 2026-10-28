@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 import pandas as pd
 from dashboard_ui import invoice_explanation_data
-from phase2 import analyze_invoices
-from phase2_config import AnalysisConfig
+from invoice_analysis import analyze_invoices
+from analysis_config import AnalysisConfig
 
 
 def invoice(**changes):

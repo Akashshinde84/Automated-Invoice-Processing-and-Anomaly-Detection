@@ -16,7 +16,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
-from phase2_config import AnalysisConfig
+from analysis_config import AnalysisConfig
 from validator import normalized, text, validate_record
 
 FEATURES = ['log_amount', 'item_count', 'day_of_month', 'weekday']
@@ -202,5 +202,5 @@ def amount_rules(index, records, validated, config):
 
 
 def detect_anomalies(invoices: pd.DataFrame, config=None, model=None) -> pd.DataFrame:
-    from phase2 import analyze_invoices
+    from invoice_analysis import analyze_invoices
     return analyze_invoices(invoices, config=config, model=model)

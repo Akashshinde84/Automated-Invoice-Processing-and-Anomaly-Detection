@@ -1,4 +1,4 @@
-"""Invoice review dashboard extending the existing Phase 1 landing page."""
+"""Integrated invoice processing, validation and review dashboard."""
 from dataclasses import replace
 from datetime import date
 from io import BytesIO
@@ -11,8 +11,8 @@ import streamlit as st
 STARTUP_ERROR = None
 try:
     from anomaly_detector import load_model, train_model
-    from phase2 import analyze_invoices, demo_data, read_records
-    from phase2_config import AnalysisConfig
+    from invoice_analysis import analyze_invoices, demo_data, read_records
+    from analysis_config import AnalysisConfig
     from workflow import read_uploaded_csv, dashboard_data, safe_name, available_models, load_dashboard_model, session_storage_root
     from reporting import csv_report, redact_paths
     from dashboard_ui import (style_dashboard, upload_page, current_review, review_editor,
@@ -48,9 +48,9 @@ def main() -> None:
         return
     st.title("Automated Invoice Processing and Anomaly Detection")
     st.caption('INVOICE REVIEW WORKSPACE  ·  Extraction / validation / explainable review. Signals are not confirmed fraud.')
-    analysis_tab, ocr_tab = st.tabs(['Validation and anomaly review', 'Phase 1 OCR'])
+    analysis_tab, ocr_tab = st.tabs(['Invoice Validation', 'Invoice Processing'])
     with ocr_tab:
-        st.subheader('Phase 1 OCR remains available')
+        st.subheader('Invoice Processing')
         st.write('Process invoice images/PDFs with the existing CLI, then upload the extracted CSV in the review tab. Original OCR text and recognition evidence remain available in the output directory.')
         st.code('.\\.venv\\Scripts\\python.exe main.py .\\invoices --csv output/new_run/invoices.csv --output-dir output/new_run/processed --raw-dir output/new_run/raw_ocr', language='powershell')
         st.write('Inspect warnings and field_review before accepting extracted numbers, dates or amounts. The historical samples are synthetic invoice fixtures, not business training data.')
@@ -73,7 +73,7 @@ def main() -> None:
         if page == 'Upload & Process Invoices':
             upload_page(storage_root)
             return
-        options = ['Phase 1 extracted CSV', 'Synthetic demonstration']
+        options = ['Extracted invoice CSV', 'Synthetic demonstration']
         if 'processed_invoices' in st.session_state:
             options.append('Processed uploads')
         if st.session_state.get('prefer_processed'):
@@ -93,7 +93,7 @@ def main() -> None:
                 model_name = 'Built-in numeric synthetic demo'
                 dataset = 'Synthetic demonstration · 17 held-out cases'
             else:
-                upload = st.file_uploader('Upload Phase 1 extracted CSV', type=['csv']) if source != 'Processed uploads' else None
+                upload = st.file_uploader('Upload extracted invoice CSV', type=['csv']) if source != 'Processed uploads' else None
                 if source == 'Processed uploads':
                     frame = st.session_state.processed_invoices
                     dataset = st.session_state.get('processed_dataset','Processed upload run')

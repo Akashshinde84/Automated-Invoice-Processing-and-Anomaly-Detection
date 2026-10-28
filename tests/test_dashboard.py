@@ -1,4 +1,4 @@
-"""Exercise both dashboard sources, filters, details and the Phase 1 tab."""
+"""Exercise both dashboard sources, filters, details and the invoice processing tab."""
 from pathlib import Path
 
 from streamlit.testing.v1 import AppTest

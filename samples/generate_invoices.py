@@ -1,7 +1,7 @@
 """Generate matching sample PNG invoices and a multipage PDF, without OCR.
 
 Run: .venv/Scripts/python.exe samples/generate_invoices.py
-Outputs live beside the tracked, manually authored transcripts in phase3/.
+Outputs live beside the tracked, manually authored invoice transcripts.
 """
 
 from pathlib import Path
@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 def main() -> None:
+    # Keep the original fixture location and source hashes stable.
     root = Path(__file__).resolve().parent / "phase3"
     candidates = [Path("C:/Windows/Fonts/consola.ttf"), Path("C:/Windows/Fonts/arial.ttf")]
     font_path = next((path for path in candidates if path.is_file()), None)

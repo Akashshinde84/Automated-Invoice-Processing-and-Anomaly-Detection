@@ -9,7 +9,7 @@ import unicodedata
 import pandas as pd
 
 from parser import Invoice
-from phase2_config import AnalysisConfig
+from analysis_config import AnalysisConfig
 
 CORE_FIELDS = ('invoice_number', 'vendor_name', 'invoice_date', 'total_amount', 'currency')
 NULLS = {'', 'null', 'none', 'nan', 'n/a', 'na', 'unknown', '-'}
@@ -34,7 +34,7 @@ def normalized(value):
 
 
 def money(value):
-    """Phase 1 exports canonical decimals; never guess locale/OCR substitutions."""
+    """Extraction exports canonical decimals; never guess locale/OCR substitutions."""
     value = text(value)
     if not re.fullmatch(r'[+-]?\d{1,18}(?:\.\d{1,6})?', value):
         return None

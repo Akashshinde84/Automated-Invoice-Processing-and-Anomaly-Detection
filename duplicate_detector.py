@@ -6,7 +6,7 @@ import json
 import pandas as pd
 from rapidfuzz.fuzz import ratio
 
-from phase2_config import AnalysisConfig
+from analysis_config import AnalysisConfig
 from validator import normalized, text, validate_record
 
 

@@ -1,4 +1,4 @@
-"""Upload, review and dashboard helpers around the unchanged Phase 1/2 pipeline."""
+"""Upload, review and dashboard helpers for the integrated extraction and analysis pipeline."""
 from contextlib import redirect_stdout, redirect_stderr
 from datetime import datetime, timedelta, timezone
 from io import BytesIO, StringIO
@@ -14,7 +14,7 @@ import pandas as pd
 from PIL import Image, UnidentifiedImageError
 import pypdfium2 as pdfium
 
-from phase2 import read_records, write_analysis
+from invoice_analysis import read_records, write_analysis
 from validator import CORE_FIELDS, iso_date, money, text, validate_record
 
 MAX_FILE_BYTES = 10*1024*1024
@@ -55,6 +55,7 @@ def trusted_model(path, root):
 
 def available_models(root):
     root=Path(root)
+    # Preserve discovery of existing demonstration artifacts without moving files.
     candidates=sorted((root/'models').glob('*.joblib'))+sorted((root/'output').glob('phase2_demo*/synthetic_model.joblib'))
     return [path for path in candidates if trusted_model(path,root)]
 

@@ -1,4 +1,4 @@
-"""Upload/review/report integration without altering the original 185 tests."""
+"""Upload/review/report integration with source-preserving extraction and analysis."""
 from datetime import date
 from io import BytesIO
 import json
@@ -9,8 +9,8 @@ from PIL import Image
 from pypdf import PdfReader
 import pytest
 
-from phase2 import analyze_invoices
-from phase2_config import AnalysisConfig
+from invoice_analysis import analyze_invoices
+from analysis_config import AnalysisConfig
 from reporting import csv_report, export_frame, pdf_report, DISCLAIMER
 from workflow import (safe_name, validate_upload, process_uploads, apply_corrections, persist_review,
                       read_uploaded_csv, dashboard_data, filter_records, currency_vendor_totals, MAX_FILE_BYTES,

@@ -3,13 +3,13 @@ pytesseract>=0.3.13,<0.4
 Pillow>=10.4,<13
 pandas>=2.2,<4
 numpy>=1.26,<3
-# Phase 2: persisted Isolation Forest pipelines; retrain artifacts after upgrades.
+# Persisted Isolation Forest pipelines; retrain artifacts after upgrades.
 scikit-learn>=1.5,<2
-rapidfuzz>=3.9,<4  # Phase 2 duplicate candidate matching
+rapidfuzz>=3.9,<4  # Duplicate candidate matching
 streamlit>=1.49,<2
-joblib>=1.4,<2  # Phase 2 trusted local model persistence
+joblib>=1.4,<2  # Trusted local model persistence
 python-dateutil>=2.9,<3
 pypdfium2>=4.30,<6
-# Phase 3 dashboard charts, PDF reports and report verification.
+# Dashboard charts and PDF reports.
 plotly>=5.24,<7
 reportlab>=4.2,<5
