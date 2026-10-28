@@ -1,0 +1,42 @@
+{
+  "provenance": "Visually checked the three original PNGs and both rendered pages of acme_multipage.pdf against the existing authored transcripts. Values are never used by the production extraction pipeline.",
+  "documents": {
+    "acme.png": {
+      "transcript": "acme.txt",
+      "invoice_number": "INV-1001",
+      "printed_date": "2026-10-27",
+      "invoice_date": "2026-10-27",
+      "total_amount": "137.50",
+      "currency": "USD",
+      "sha256": "09ac08dc6647ec08efd385de774cbebcdf204035d3b33cce5f642b04c2546a93"
+    },
+    "acme_multipage.pdf": {
+      "transcript": "acme.txt",
+      "invoice_number": "INV-1001",
+      "printed_date": "2026-10-27",
+      "invoice_date": "2026-10-27",
+      "total_amount": "137.50",
+      "currency": "USD",
+      "sha256": "7c4b42aaccd02c30ad8c9c1d8afbe36a1270be5ab754d8d0159c48020e34f12c"
+    },
+    "ambiguous.png": {
+      "transcript": "ambiguous.txt",
+      "invoice_number": "AMB-03",
+      "printed_date": "03/04/2026",
+      "invoice_date": null,
+      "date_note": "Day/month order cannot be determined from the source. Null is required in auto mode.",
+      "total_amount": "100.00",
+      "currency": "GBP",
+      "sha256": "f8271bdd853132c14bfeac458ba2003b74466b439f989fa606222c137fb26882"
+    },
+    "euro.png": {
+      "transcript": "euro.txt",
+      "invoice_number": "EU-2042",
+      "printed_date": "28 October 2026",
+      "invoice_date": "2026-10-28",
+      "total_amount": "1200.00",
+      "currency": "EUR",
+      "sha256": "a929d69b9c3dff9bfc5c76e5559e0f0eb872c01dfe2313a4e0c0442bbb568e01"
+    }
+  }
+}

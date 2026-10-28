@@ -1,0 +1,6 @@
+Vendor: Example Ambiguous Dates Ltd
+Invoice Number: AMB-03
+Date: 03/04/2026
+Description | Quantity | Unit Price | Line Total
+Service | 1 | GBP 100.00 | GBP 100.00
+Total Amount: GBP 100.00

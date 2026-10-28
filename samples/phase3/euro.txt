@@ -1,0 +1,7 @@
+Supplier: Example Europe GmbH
+Bill No: EU-2042
+Date: 28 October 2026
+Description | Qty | Unit Price | Line Total
+Consulting | 2 | EUR 500,00 | EUR 1.000,00
+Subtotal: EUR 1.000,00
+Grand Total: EUR 1.200,00

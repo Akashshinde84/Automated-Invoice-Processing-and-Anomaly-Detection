@@ -1,0 +1,11 @@
+Vendor: ACME Supplies
+Invoice No: INV-1001
+Invoice Date: 2026-10-27
+Currency: USD
+Description | Quantity | Unit Price | Line Total
+Printer paper | 2 | USD 50.00 | USD 100.00
+Ink cartridge | 1 | USD 25.00 | USD 25.00
+Subtotal: USD 125.00
+Tax: USD 12.50
+Grand Total: USD 137.50
+Balance Due: USD 0.00
