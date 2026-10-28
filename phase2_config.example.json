@@ -1,0 +1,15 @@
+{
+  "amount_tolerance": "0.01",
+  "high_amount_limits": {"USD": "10000", "EUR": "10000", "GBP": "10000", "INR": "500000"},
+  "vendor_similarity": 90,
+  "invoice_similarity": 85,
+  "duplicate_date_days": 7,
+  "vendor_min_history": 5,
+  "vendor_amount_multiplier": 4,
+  "low_ocr_confidence": 85,
+  "min_training_rows": 100,
+  "contamination": 0.05,
+  "random_seed": 42,
+  "medium_priority": 25,
+  "high_priority": 60
+}

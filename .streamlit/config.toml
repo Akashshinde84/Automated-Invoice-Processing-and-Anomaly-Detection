@@ -1,0 +1,14 @@
+[theme]
+base = "dark"
+primaryColor = "#59B6E8"
+backgroundColor = "#0C1424"
+secondaryBackgroundColor = "#16243A"
+textColor = "#E8EDF5"
+font = "sans serif"
+
+[server]
+maxUploadSize = 10
+headless = true
+
+[browser]
+gatherUsageStats = false

@@ -1,14 +1,15 @@
-opencv-python>=4.10,<5
+opencv-python-headless>=4.10,<5
 pytesseract>=0.3.13,<0.4
 Pillow>=10.4,<13
 pandas>=2.2,<4
 numpy>=1.26,<3
+# Phase 2: persisted Isolation Forest pipelines; retrain artifacts after upgrades.
 scikit-learn>=1.5,<2
-rapidfuzz>=3.9,<4
-streamlit>=1.38,<2
-matplotlib>=3.9,<4
-seaborn>=0.13,<0.14
-pytest>=8,<10
-joblib>=1.4,<2
+rapidfuzz>=3.9,<4  # Phase 2 duplicate candidate matching
+streamlit>=1.49,<2
+joblib>=1.4,<2  # Phase 2 trusted local model persistence
 python-dateutil>=2.9,<3
 pypdfium2>=4.30,<6
+# Phase 3 dashboard charts, PDF reports and report verification.
+plotly>=5.24,<7
+reportlab>=4.2,<5
