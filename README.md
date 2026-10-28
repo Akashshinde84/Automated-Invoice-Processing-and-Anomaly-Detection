@@ -1,145 +1,157 @@
-﻿# Automated Invoice Processing and Anomaly Detection using Machine Learning
+﻿<h1 align="center">Automated Invoice Processing and Anomaly Detection using Machine Learning</h1>
+
+<p align="center"><strong>Turn invoice documents into structured records and explainable review priorities.</strong></p>
+<p align="center">OCR extraction · Data validation · Duplicate matching · Machine learning · Interactive reporting</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
+  <img src="https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit dashboard">
+  <img src="https://img.shields.io/badge/Tesseract-OCR-166534" alt="Tesseract OCR">
+  <img src="https://img.shields.io/badge/scikit--learn-Isolation%20Forest-F7931E?logo=scikitlearn&logoColor=white" alt="scikit-learn Isolation Forest">
+  <img src="https://img.shields.io/badge/Plotly-Analytics-3F4F75?logo=plotly&logoColor=white" alt="Plotly analytics">
+</p>
+
+<p align="center">
+  <a href="https://github.com/Akashshinde84/Automated-Invoice-Processing-and-Anomaly-Detection">GitHub Repository</a> ·
+  <a href="#overview">Overview</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="#application-workflow">Usage</a> ·
+  <a href="#machine-learning-approach">ML Methodology</a> ·
+  <a href="#testing">Testing</a> ·
+  <a href="#deployment">Deployment</a>
+</p>
 
 ## Overview
 
-A Python application for extracting invoice information, validating records,
-identifying duplicate candidates and unusual patterns, and organizing manual
-review in a Streamlit dashboard. The application combines document processing,
-explainable rules, Isolation Forest, and downloadable reports in one workflow.
+Manual invoice entry makes it easy to miss inconsistent amounts, repeated invoices, and unusual vendor activity. This project brings document extraction and review into one Python application: read PDFs or images, inspect extracted fields, validate records, compare duplicate candidates, and investigate unusual patterns.
 
-Anomaly flags are review signals, not proof of fraud. OCR results require source
-review, and synthetic model evaluations do not establish real-world accuracy.
+Tesseract OCR reduces manual transcription for scanned documents, while digital PDFs can use their text layer directly. Explainable rules and optional Isolation Forest models help prioritize investigation. A Streamlit workspace keeps source evidence, corrections, analysis, and downloadable reports together, supporting more consistent review and traceability.
+
+> **Review support:** Anomaly flags are not proof of fraud. OCR values require source review, and synthetic ML results do not establish real-world detection accuracy.
 
 ## Key Features
 
-- PDF, PNG, JPG and JPEG invoice processing with preserved source copies.
-- Reliable digital-PDF text extraction with OCR fallback for scanned content.
-- OpenCV preprocessing, Tesseract confidence, original text and recognition evidence.
-- Invoice number, vendor, date, currency and Decimal amount extraction.
-- Field validation and totals reconciliation when supporting values are available.
-- Exact-document, exact-field, identity-conflict and fuzzy duplicate candidates.
-- Configurable amount rules and currency-specific Isolation Forest models.
-- Explainable 0–100 risk scores and separate OCR review statuses.
-- Source-preserving corrections, searchable records and currency-aware charts.
-- Scoped PDF/CSV exports with private paths and raw OCR columns excluded by default.
-
-## Technologies Used
-
-| Area | Technologies |
+| Capability | What the application does |
 |---|---|
-| Application | Python 3.12, Streamlit |
-| Document processing | Tesseract, pytesseract, OpenCV Headless, Pillow, PDFium |
-| Data and matching | pandas, NumPy, Decimal, python-dateutil, RapidFuzz |
-| Machine learning | scikit-learn Isolation Forest, preprocessing pipelines, joblib |
-| Visualization and reports | Plotly, ReportLab |
-| Testing | pytest, Streamlit AppTest, pypdf |
+| Multi-invoice upload | Accepts PDF, PNG, JPG, and JPEG files with per-file processing status and preserved source copies. |
+| PDF and image extraction | Uses digital-PDF text extraction or OpenCV preprocessing and Tesseract OCR for scanned content. |
+| Structured invoice fields | Extracts invoice number, vendor, date, currency, total amount, and supported line-item layouts. |
+| Data validation | Checks required fields, dates, monetary values, and arithmetic when supporting components are available. |
+| Duplicate candidates | Finds exact-document, exact-field, identity-conflict, and fuzzy matches without deleting records. |
+| Rule-based anomalies | Applies currency-specific amount thresholds and vendor-history amount checks. |
+| Isolation Forest analysis | Scores eligible records with separate models per currency and saved preprocessing pipelines. |
+| Explainable risk scoring | Shows a capped 0–100 heuristic score, priority, contributing factors, and recommended review actions. |
+| OCR review and corrections | Preserves original extraction evidence and saves explicit core-field corrections as separate versions. |
+| Interactive dashboard | Provides KPI cards, search, filters, invoice explanations, and currency-specific Plotly charts. |
+| PDF and CSV reporting | Exports filtered or selected records; private paths and raw OCR columns are excluded by default. |
 
-Runtime dependencies are in `requirements.txt`; development and report-verification
-dependencies are in `requirements-dev.txt`. Tesseract is a separate system program.
+**Upload limits:** 10 MB per file, 20 files / 50 MB per batch, and 25 pages per PDF. Decoded image/page limits also apply. Analysis supports up to 2,000 records per batch.
+
+## Application Screenshots
+
+Screenshots have not been added yet. The gallery below reserves filenames for real application captures; no missing images are embedded.
+
+| View | Planned relative image path | Capture guidance |
+|---|---|---|
+| Dashboard Overview | `docs/screenshots/dashboard-overview.png` | Show the KPI cards and review summary. |
+| Invoice Upload | `docs/screenshots/invoice-upload.png` | Show a synthetic upload and extraction status. |
+| Anomaly Detection | `docs/screenshots/anomaly-detection.png` | Show rule/ML results and score contributions. |
+| Invoice Review | `docs/screenshots/invoice-review.png` | Show the core-field correction form. |
+| Analytics Charts | `docs/screenshots/analytics-charts.png` | Show distributions and currency-specific vendor totals. |
+| Reports | `docs/screenshots/reports.png` | Show report selection and download controls. |
+
+To populate the gallery, create `docs/screenshots/`, capture these views using synthetic data, and save the files with the names above. After each file exists, embed it using relative Markdown, for example:
+
+```markdown
+![Dashboard overview](docs/screenshots/dashboard-overview.png)
+```
+
+Exclude confidential invoices, local file paths, and personal information from captures.
 
 ## System Architecture
 
 ```mermaid
 flowchart TD
-    A[PDF or image invoices] --> B[PDF text extraction or OpenCV and Tesseract]
-    B --> C[Structured records and preserved OCR evidence]
-    C --> D[Source review and explicit corrections]
-    D --> E[Field validation and duplicate matching]
-    E --> F[Amount rules and optional Isolation Forest]
-    F --> G[Risk contributions and review priorities]
-    G --> H[Dashboard, filters and explanations]
-    H --> I[PDF and CSV reports]
+    A["Invoice upload: PDF or image"] --> B["Digital PDF text or OpenCV + Tesseract OCR"]
+    B --> C["Structured fields and preserved extraction evidence"]
+    C --> D["Source review and explicit corrections"]
+    D --> E["Field and arithmetic validation"]
+    E --> F["Duplicate candidate detection"]
+    F --> G["Amount rules and optional Isolation Forest analysis"]
+    G --> H["Risk contributions and review priority"]
+    H --> I["Streamlit dashboard and invoice explanations"]
+    I --> J["Filtered or selected PDF / CSV reports"]
+    K["Extracted invoice CSV"] --> D
 ```
 
-`pipeline.py` coordinates extraction. `invoice_analysis.py` coordinates validation,
-duplicate matching, rules and optional model inference. `app.py` and its UI helpers
-present results without recalculating the detection policy. Corrections retain
-original values and warnings; reports use the analyzed records and selected scope.
+[Pipeline orchestration](pipeline.py) handles document extraction. [Analysis orchestration](invoice_analysis.py) combines validation, duplicate matching, rules, and eligible model inference. [The dashboard](app.py) presents those results; corrections retain original values and warnings.
+
+## Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| Python 3.12 | Application runtime and command-line tools |
+| Streamlit | Upload, review, analysis, and reporting interface |
+| Tesseract + pytesseract | OCR and recognition confidence for scanned content |
+| OpenCV Headless + Pillow | Image decoding, thresholding, and conservative deskew |
+| PDFium via pypdfium2 | PDF text extraction and page rendering |
+| pandas + NumPy | Record processing and numerical features |
+| Decimal + python-dateutil | Monetary precision and date parsing |
+| RapidFuzz | Vendor and invoice-number similarity matching |
+| scikit-learn / Isolation Forest | Preprocessing pipelines and unsupervised outlier detection |
+| joblib | Trusted local model persistence |
+| Plotly + ReportLab | Interactive charts and PDF reports |
+| pytest + Streamlit AppTest + pypdf | Automated behavior checks and report verification |
+
+See [runtime dependencies](requirements.txt), [development dependencies](requirements-dev.txt), and [Linux system packages](packages.txt). Tesseract is installed separately from Python dependencies.
 
 ## Installation
 
-### Windows and VS Code
+### 1. Prepare Windows prerequisites
 
-Open the repository folder in VS Code and use PowerShell:
+Install **Python 3.12**, **Git**, and **Tesseract OCR with English language data**. Use PowerShell for the commands below. Tesseract installation guidance is available in the [official documentation](https://tesseract-ocr.github.io/tessdoc/Installation.html).
+
+### 2. Clone the repository
 
 ```powershell
-# Create the environment only if it does not already exist:
+git clone https://github.com/Akashshinde84/Automated-Invoice-Processing-and-Anomaly-Detection.git
+cd Automated-Invoice-Processing-and-Anomaly-Detection
+```
+
+### 3. Create and activate a virtual environment
+
+```powershell
 py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks activation, continue using the explicit `.venv` interpreter in the commands below. In VS Code, select `.venv\Scripts\python.exe` as the Python interpreter.
+
+### 4. Install dependencies
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-Select `.venv\Scripts\python.exe` as the VS Code interpreter. Activation is optional.
-For runtime installation without test tools, install `requirements.txt` instead.
-Use headless OpenCV; do not install `opencv-python` alongside `opencv-python-headless`.
+Use `requirements-dev.txt` instead if you also want test tools. Keep `opencv-python-headless`; installing `opencv-python` alongside it can cause conflicts.
 
-Install Tesseract with English language data separately. Check:
+### 5. Verify Tesseract
 
 ```powershell
 tesseract --version
 tesseract --list-langs
 ```
 
-Discovery checks `TESSERACT_CMD`, PATH and common Windows installation folders. If
-necessary, set the actual installed executable path:
+Ensure `eng` appears in the language list. Discovery checks `TESSERACT_CMD`, PATH, and common Windows installation folders. If necessary, set the actual executable location:
 
 ```powershell
 $env:TESSERACT_CMD='C:\Program Files\Tesseract-OCR\tesseract.exe'
 & $env:TESSERACT_CMD --version
+& $env:TESSERACT_CMD --list-langs
 ```
 
-### Linux hosting dependencies
-
-`packages.txt` declares Tesseract, English language data and DejaVu fonts for
-Streamlit Community Cloud. PDFium handles PDF extraction/rendering; Poppler is
-not needed. Remove Windows-specific executable overrides on Linux.
-
-## Configuration
-
-`analysis_config.example.json` documents the validated analysis settings. Supply
-`--config` to the analysis CLI; dashboard settings apply to the current session.
-
-| Setting | Default |
-|---|---|
-| High amount limits | USD/EUR/GBP 10,000; INR 500,000 |
-| Vendor / invoice similarity | 90 / 85 |
-| Duplicate date window | 7 days |
-| Monetary comparison tolerance | 0.01 |
-| Vendor history | At least 5 suitable earlier records; amount multiplier 4 |
-| Review priorities | LOW below 25; MEDIUM 25–59; HIGH at least 60 |
-| ML training minimum | 100 eligible distinct records per currency |
-
-`--as-of YYYY-MM-DD` makes date checks reproducible. Otherwise the reference date
-uses India-local time. Different currencies are not combined or converted.
-
-Upload limits are 10 MB/file, 20 files/50 MB per batch and 25 PDF pages, with decoded
-image/page pixel limits. Analysis accepts at most 2,000 records per batch.
-
-### Storage and privacy
-
-Local mode retains source copies under `invoices/uploads/` and separate extraction
-and review versions under `output/runs/`. No automatic cleanup removes user data.
-For a hosted public demonstration, set this top-level value in Streamlit Advanced
-settings → Secrets; never commit `.streamlit/secrets.toml`:
-
-```toml
-INVOICE_STORAGE_MODE = "session"
-```
-
-Session mode uses a unique OS temporary directory per browser session and disables
-automatic loading of repository-local extraction CSVs. Reports are generated in
-memory. Download required results before restarting or leaving: temporary host
-storage is not durable. Files may remain on the running host until recycling.
-Session isolation is not authentication, encryption or guaranteed deletion. Use
-synthetic samples only in public demonstrations.
-
-`.gitignore` excludes environments, credentials, logs, temporary files, private
-invoices, generated outputs, reports, datasets and model artifacts. Ignore rules
-do not untrack previously committed files; review staged content before publishing.
-
-## How to Run
-
-### Dashboard
+### 6. Start the application
 
 ```powershell
 $env:OPENBLAS_NUM_THREADS='1'
@@ -149,144 +161,152 @@ $env:OPENCV_FOR_THREADS_NUM='1'
 .\.venv\Scripts\python.exe -m streamlit run app.py --server.port 8502
 ```
 
-Open http://localhost:8502. A fresh checkout starts with the clearly labeled
-synthetic demonstration; existing output folders or saved models are not required.
-To simulate session storage locally, set `$env:INVOICE_STORAGE_MODE='session'`
-before launching. Remove that environment variable to resume local persistent mode.
+Open [localhost:8502](http://localhost:8502). A fresh checkout starts with the labeled synthetic demonstration; saved models and generated outputs are not required.
 
-### Batch invoice processing and analysis
+## Application Workflow
 
-Place source invoices in `invoices/`. Use fresh destinations to preserve earlier
-exports; the extraction CLI can replace a specified CSV, while analysis/model
-commands reject existing destinations.
+1. **Open the workspace.** Explore the synthetic demonstration or select **Upload & Process Invoices** in the sidebar.
+2. **Upload source documents.** Choose supported PDFs/images and click **Extract invoice fields**. Inspect processing status and warnings.
+3. **Review extracted fields.** Compare values with the original document. Save supported corrections in the upload page or **Invoice Records**. Leave uncertain values unresolved.
+4. **Analyze the batch.** Open **Dashboard**; processed uploads become the data source. Validation, duplicate matching, rules, and eligible optional model inference run on the records.
+5. **Investigate findings.** Use **Anomaly Detection** and the invoice explanation selector to inspect reasons, duplicate matches, OCR warnings, and risk contributions.
+6. **Download results.** Apply filters, then use **Reports** for PDF/CSV downloads of filtered or selected records.
+
+You can also upload an extracted CSV through **Extracted invoice CSV**. Byte-identical uploaded documents share one extraction record while all source copies are retained. Other duplicate candidates remain separate records for review.
+
+## How to Run
+
+The [installation guide](#installation) starts the dashboard. The same processing and analysis modules are available from the command line.
+
+### Batch extraction and analysis
+
+Place invoice documents in `invoices/`, then run:
 
 ```powershell
 .\.venv\Scripts\python.exe main.py invoices --csv output/invoice_run/invoices.csv --output-dir output/invoice_run/processed --raw-dir output/invoice_run/raw_ocr
 .\.venv\Scripts\python.exe invoice_analysis.py analyze output/invoice_run/invoices.csv --output output/invoice_run/analysis.csv --config analysis_config.example.json
 ```
 
-Extraction supports `--date-order auto|dmy|mdy`, `--decimal-separator`, `--dpi`,
-`--psm`, `--threshold` and `--timeout`. Choose a date convention only when supported
-by the source. Transcript replay with `--text-input` does not perform OCR.
+Choose fresh destinations for each run. Extraction can replace its specified CSV; analysis and model commands reject existing destinations. Extraction options include `--date-order`, `--decimal-separator`, `--dpi`, `--psm`, `--threshold`, and `--timeout`. The `--text-input` option replays text for parsing and does not perform OCR.
 
-### Synthetic model demonstration and evaluation
-
-Choose unused output/model paths for each run:
+### Synthetic model evaluation
 
 ```powershell
 .\.venv\Scripts\python.exe model_evaluation.py --output-dir output/model_evaluation_run --model models/vendor_demo.joblib --as-of 2026-10-29
-# Also saves models/vendor_demo_numeric_baseline.joblib:
-.\.venv\Scripts\python.exe invoice_analysis.py analyze output/model_evaluation_run/synthetic_evaluation.csv --output output/model_evaluation_run/reanalysis.csv --model models/vendor_demo_numeric_baseline.joblib --as-of 2026-10-29
 ```
 
-To train explicitly on suitable records, use `invoice_analysis.py train INPUT.csv
---model models/NEW.joblib --kind synthetic_demo|verified_real`. Real training
-requires `human_verified=true` and valid complete records without unresolved OCR
-or financial validation errors. Uploaded invoices are not automatically training data.
+This generates separate synthetic training/evaluation data, model artifacts, and evaluation reports. Use unused output and model paths. The date is an explicit reproducible example.
 
-### Streamlit Community Cloud
+To train a model on suitable reviewed records:
 
-After reviewing and approving publication, push the reviewed repository to GitHub.
-In Community Cloud choose the repository and branch, entry point **`app.py`**, and
-Python **3.12**. Set session storage in Advanced settings → Secrets, then approve
-deployment. Keep `requirements.txt`, `packages.txt` and `.streamlit/config.toml` in
-their supplied locations. Inspect build/runtime logs and verify all pages and
-sample downloads. An actual Linux/cloud build is required to confirm hosting.
+```powershell
+.\.venv\Scripts\python.exe invoice_analysis.py train INPUT.csv --model models/reviewed_model.joblib --kind verified_real
+```
 
-## Application Workflow
+Replace `INPUT.csv` with your dataset. Real training requires `human_verified=true` and complete, valid records without unresolved OCR or financial validation errors. Uploading or correcting invoices does not automatically train a model.
 
-1. Upload PDFs/images or load an extracted invoice CSV. Synthetic source fixtures
-   and authored ground truth are provided under `samples/`.
-2. Extract fields and inspect original documents, confidence, warnings and evidence.
-3. Save explicit, source-supported corrections. Ambiguous values remain unresolved.
-4. Validate records, compare duplicate candidates, apply rules and eligible ML inference.
-5. Inspect risk contributions, review priorities and recommended manual actions.
-6. Filter records and download the selected PDF/CSV report.
+## Configuration
 
-Byte-identical sources share one extraction record, with all uploaded source copies
-preserved. Duplicate invoice candidates remain separate records. Row analysis IDs
-are positional within a batch; original document identifiers are retained.
+[analysis_config.example.json](analysis_config.example.json) documents the validated analysis policy. Use `--config` in the analysis CLI; dashboard controls apply to the current session.
+
+| Setting | Default |
+|---|---|
+| High amount thresholds | USD / EUR / GBP: 10,000; INR: 500,000 |
+| Vendor / invoice similarity | 90 / 85 |
+| Duplicate date window | 7 days |
+| Monetary comparison tolerance | 0.01 |
+| Vendor amount history | At least 5 suitable earlier records; multiplier 4 |
+| Review priority | LOW: 0–24; MEDIUM: 25–59; HIGH: 60–100 |
+| ML training minimum | 100 eligible distinct records per currency |
+
+`--as-of YYYY-MM-DD` fixes the reference date; otherwise the application uses India-local time. Amounts in different currencies are not combined or converted.
 
 ## Machine Learning Approach
 
-Isolation Forest is fitted separately per currency. The default `numeric_v1`
-profile uses log amount, item count, day of month and weekday with scaling in a
-saved pipeline. The optional `vendor_v2` profile adds normalized vendor categories
-and training-fitted vendor frequencies with median imputation and scaling.
-Unseen categories are handled without treating novelty as proof of wrongdoing.
+### Isolation Forest and preprocessing
 
-Default settings are 200 trees, contamination 0.05, seed 42, one job and automatic
-sample size. The reproducible evaluation uses 600 synthetic training records and
-280 separate evaluation records, independent generators and separately stored
-expected labels. Labels do not enter training or inference.
+Isolation Forest identifies records that are easier to isolate through random feature splits. It provides an unsupervised outlier signal alongside explicit field and amount checks.
 
-| Synthetic profile | Precision | Recall | TN / FP / FN / TP |
-|---|---:|---:|---|
-| Numeric baseline | 80.70% | 57.50% | 149 / 11 / 34 / 46 |
-| Experimental vendor-aware | 61.22% | 37.50% | 141 / 19 / 50 / 30 |
+Models are fitted **separately per currency**. The default `numeric_v1` profile uses log amount, item count, day of month, and weekday with scaling in a persisted pipeline. The experimental `vendor_v2` profile adds normalized vendor categories and training-fitted vendor frequencies, with median imputation, scaling, and categorical encoding.
 
-On this fixture, 240 records are scored and 40 invalid/unverified records are
-explicitly skipped. The vendor-aware model underperforms the numeric baseline
-and remains experimental. These measurements are synthetic behavior checks,
-not validated real-world fraud accuracy. Outlier scores are not fraud probabilities.
+Defaults are **200 trees**, **0.05 contamination**, and **random seed 42**. Contamination is a model setting, not an estimate of fraud prevalence. Ineligible records are explicitly skipped rather than assigned a misleading model result.
 
-Models include fitted preprocessing and version metadata. The dashboard accepts
-only trusted project-created local models with matching integrity records; model
-uploads are disabled. Never load joblib/pickle files from untrusted sources.
-Retrain when scikit-learn versions change. Saved artifacts are excluded from Git.
+### Synthetic evaluation and model boundaries
 
-### Explainable risk policy
+The evaluation tool creates 600 synthetic training records and 280 separate evaluation records using independent generators. Expected labels are stored separately and do not enter training or inference. The built-in dashboard demonstration uses synthetic data as well.
 
-The existing heuristic score is capped at 100. Validation findings contribute
-10–25 each, capped at 40; the strongest duplicate candidate contributes 20, 25 or
-35; amount rules contribute 20 each, capped at 30; an eligible verified-real ML
-outlier contributes 15. Synthetic-model outliers and OCR uncertainty contribute
-zero risk points. OCR review remains a separate status.
+These datasets demonstrate behavior and enable repeatable checks; they do not establish performance on business invoices. The experimental vendor-aware profile underperformed the numeric baseline on the supplied synthetic evaluation. No real-world accuracy claim is made here.
 
-A USD 50,000 invoice against a USD 10,000 threshold contributes 20/LOW on that
-signal alone and still needs review. LOW does not mean approved. Additional
-supported signals can increase priority. Filtering a completed analysis does not
-recompute scores; changing the input batch can change duplicate/history evidence.
+The dashboard offers trusted project-created local models with matching integrity records and disables model uploads. Integrity markers do not make arbitrary pickle/joblib files safe: only load artifacts you trust. Retrain persisted models when scikit-learn versions change.
+
+### Explainable risk scoring
+
+The **0–100 risk score is a heuristic review priority**, distinct from the Isolation Forest decision score.
+
+| Signal | Risk contribution |
+|---|---|
+| Field validation findings | 10–25 per scored finding; category capped at 40 |
+| Strongest duplicate candidate | 20, 25, or 35 |
+| Amount rules | 20 per rule; category capped at 30 |
+| Eligible verified-real model outlier | 15 |
+| Synthetic model outlier / OCR uncertainty | 0; OCR review is tracked separately |
+
+**Anomaly scores are not fraud probabilities.** LOW priority does not mean approved: a USD 50,000 invoice against a USD 10,000 threshold contributes 20/LOW from that signal alone and still warrants review. Filtering completed results does not recompute scores; changing the input batch can change duplicate and vendor-history evidence.
 
 ## Dashboard Features
 
-| Page | Purpose |
+| Navigation section | Review tasks |
 |---|---|
-| Dashboard | Invoice KPIs, currency-specific charts, records and explanations |
-| Upload & Process Invoices | Multi-file extraction, status and source review |
-| Invoice Records | Search, filters, original values and correction audit |
-| Anomaly Detection | Rule/ML results, contributions and duplicate details |
-| Reports | Filtered or selected CSV/PDF downloads |
-| Settings | Validated thresholds, analysis date and trusted model selection |
+| Dashboard | Inspect invoice KPIs, review summaries, charts, filtered records, and explanations. |
+| Upload & Process Invoices | Extract multiple documents, inspect status, and review core fields. |
+| Invoice Records | Search/filter records, correct core fields, and inspect original values and correction history. |
+| Anomaly Detection | Examine rule/ML findings, score contributions, duplicate candidates, and charts. |
+| Reports | Download filtered or selected PDF/CSV records. |
+| Settings | Inspect validated configuration and adjust sidebar controls and trusted model selection. |
 
-The Invoice Processing tab retains CLI guidance. Explanations show invoice ID,
-score progress, priority, plain-English reasons, risk contributions, duplicate
-matches, OCR warnings and recommended actions. Technical JSON is optional.
-Default exports omit private local paths/raw OCR; explicit inclusion is opt-in.
-CSV text is protected against spreadsheet formula interpretation. Validation KPIs
-are field checks, not certification of OCR accuracy, payment approval or no fraud.
+**KPIs** include invoice count, rule flags, duplicate candidate records, high priority records, OCR review requirements, validation status, and ML outliers. Validation counts describe field checks; they do not certify OCR accuracy or payment approval.
+
+**Charts** show risk distributions, priorities, observed amounts, vendor totals, duplicate candidate counts, and rule/validation frequencies. Monetary charts use one currency at a time. **Filters** cover vendor, currency, date range, anomaly status, priority, and OCR review status.
+
+Each invoice explanation includes reasons, point contributions, duplicate details, OCR uncertainty, and suggested manual actions, with optional technical details. The **Invoice Processing** tab also provides CLI guidance.
 
 ## Project Structure
 
-| Path | Purpose |
-|---|---|
-| `app.py`, `dashboard_ui.py` | Streamlit entry point and presentation |
-| `workflow.py` | Upload validation, corrections, filtering and storage |
-| `main.py`, `pipeline.py` | Extraction CLI and document orchestration |
-| `preprocessing.py`, `ocr_engine.py`, `parser.py` | Image processing, text recognition and parsing |
-| `invoice_analysis.py`, `analysis_config.py` | Analysis orchestration and validated policy settings |
-| `validator.py`, `duplicate_detector.py` | Field/arithmetic validation and candidate matching |
-| `anomaly_detector.py`, `model_evaluation.py` | Amount rules, ML persistence and synthetic evaluation |
-| `reporting.py` | Privacy-conscious CSV/PDF reports |
-| `samples/`, `tests/` | Preserved synthetic fixtures and automated tests |
-| `invoices/`, `output/`, `models/`, `reports/` | Local inputs and generated artifacts, ignored by Git |
-| `requirements*.txt`, `packages.txt`, `.streamlit/` | Dependencies and application configuration |
+```text
+.
+├── app.py                         # Streamlit entry point
+├── dashboard_ui.py                # Upload, review, charts, explanations, reports
+├── workflow.py                    # Storage, upload validation, corrections, filters
+├── main.py                        # Document extraction CLI
+├── pipeline.py                    # Extraction orchestration and serialization
+├── preprocessing.py               # Image and PDF preprocessing
+├── ocr_engine.py                  # Digital text extraction and Tesseract OCR
+├── parser.py                      # Invoice field and line-item parsing
+├── invoice_analysis.py            # Analysis and model-training CLI
+├── analysis_config.py             # Validated settings
+├── analysis_config.example.json   # Example analysis policy
+├── validator.py                   # Field and arithmetic validation
+├── duplicate_detector.py          # Duplicate candidate matching
+├── anomaly_detector.py            # Amount rules, model training and inference
+├── model_evaluation.py            # Synthetic evaluation and reports
+├── reporting.py                   # PDF and CSV export
+├── samples/                       # Synthetic fixtures and generator
+├── tests/                         # Automated tests
+├── .streamlit/
+│   └── config.toml                # Theme, upload cap, server settings
+├── requirements.txt               # Runtime dependencies
+├── requirements-dev.txt           # Test dependencies
+├── packages.txt                   # Linux hosting dependencies
+├── .gitignore
+├── LICENSE
+└── README.md
+```
 
-Compatibility command/import adapters are retained for existing integrations.
-Existing fixture and artifact locations remain intact; no migration of user data
-or model files is required. Prefer the descriptive entry points documented above.
+This tree highlights the main application files. Virtual environments, caches, temporary files, generated artifacts, and private invoice data are omitted.
 
 ## Testing
+
+From the repository root:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
@@ -294,34 +314,54 @@ or model files is required. Prefer the descriptive entry points documented above
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-Tests cover preprocessing, digital/scanned PDF behavior, OCR, parsing, Decimal
-validation, duplicate matching, risk boundaries, training/save/load/inference,
-evaluation separation, upload safety, correction provenance, filters, charts,
-PDF/CSV privacy and dashboard pages. Real recognition tests require Tesseract and
-skip with an explicit reason when it is unavailable. AppTest verifies UI behavior;
-manual browser uploads/downloads and an actual cloud build remain separate checks.
+Tests cover preprocessing, digital/scanned PDFs, parsing, monetary validation, duplicates, risk boundaries, model persistence/inference, evaluation separation, upload handling, correction provenance, filters, charts, reporting privacy, and Streamlit pages. Real OCR tests require Tesseract and report an explicit skip reason when it is unavailable.
+
+Streamlit AppTest checks UI behavior; manual browser upload/download checks and a successful Linux/cloud build are separate validations.
+
+## Deployment
+
+Deploy through [Streamlit Community Cloud](https://share.streamlit.io/) using the [official deployment guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy). No verified public deployment URL is provided in this README.
+
+1. Connect GitHub and select this repository and the branch you intend to deploy.
+2. Set the app entry point to **`app.py`** and select **Python 3.12** in Advanced settings.
+3. Keep [requirements.txt](requirements.txt), [packages.txt](packages.txt), and [.streamlit/config.toml](.streamlit/config.toml) in their supplied locations. System packages provide Tesseract, English language data, and DejaVu fonts; PDFium handles PDFs without Poppler.
+4. Add the following top-level setting in **Advanced settings → Secrets** for a public demonstration:
+
+   ```toml
+   INVOICE_STORAGE_MODE = "session"
+   ```
+
+5. Deploy, inspect build/runtime logs, and verify all navigation pages, synthetic uploads, and PDF/CSV downloads on the running host.
+
+### Storage and uploaded invoice privacy
+
+Local mode preserves source copies under `invoices/uploads/` and extraction/review versions under `output/runs/`. Session mode creates a unique OS temporary directory per browser session and disables automatic loading of repository-local extraction CSVs. Reports are generated in memory.
+
+Temporary host storage is not durable. Download required results before restarting or leaving; files may remain on the host until recycling. Session isolation does not provide authentication, encryption, or guaranteed deletion. Use synthetic invoices for public demonstrations and establish access control and retention policies before handling confidential records.
+
+For local session-mode testing, set `$env:INVOICE_STORAGE_MODE='session'` before launching. Remove Windows-specific `TESSERACT_CMD` overrides on Linux. Keep credentials and `.streamlit/secrets.toml` out of Git; review tracked files before publishing because ignore rules do not untrack existing files.
 
 ## Limitations
 
-- OCR may misread punctuation, amounts and line items. Confidence is not proof of
-  correctness. Core corrections do not certify every field or reconcile totals.
-- An ambiguous date such as `03/04/2026` remains unresolved without issuer context.
-  Missing financial components are never assumed zero.
-- The parser supports selected labeled/table layouts, not arbitrary document layout.
-  Deskew handles small angles, not general upside-down/quarter-turn correction.
-- Duplicate matches can represent legitimate copies/revisions and may be provisional
-  when OCR is uncertain. No candidate is automatically deleted or rejected.
-- ML is trained/evaluated on synthetic data for demonstration and has false positives
-  and false negatives. Vendor novelty detection is especially limited.
-- Public hosting has resource limits and ephemeral storage. The app is not an
-  authenticated multi-user accounting database or automatic payment approval system.
-- Keep confidential invoices out of public demos. Report privacy defaults do not
-  replace organizational access control or data-retention policies.
+- **OCR and layout coverage:** Recognition can misread dates, punctuation, amounts, and line items. Confidence is not proof of correctness; the parser supports selected layouts rather than arbitrary documents.
+- **Human review:** Compare uncertain fields with the source. Core-field corrections do not certify every line item or clear all OCR warnings. Ambiguous dates remain unresolved without issuer context; missing financial components are not assumed zero.
+- **Duplicate interpretation:** Matches can represent legitimate copies or revisions, especially when OCR is uncertain. Candidates are not automatically deleted or rejected.
+- **ML generalization:** Synthetic evaluation does not establish real-world fraud accuracy. False positives and false negatives are possible; unusual invoices may be legitimate.
+- **Hosting and persistence:** Cloud resource limits and temporary storage affect availability and retention. The application does not provide authenticated multi-user accounting storage or automatic payment approval.
 
 ## Future Enhancements
 
-- Evaluate against consented, manually verified invoice datasets.
-- Broaden layout coverage and source-grounded extraction confidence.
-- Improve vendor-pattern features using independently held-out evaluations.
-- Add authenticated review workflows and durable storage with explicit retention.
-- Extend accessibility and browser-based end-to-end test coverage.
+These are proposed improvements, not current capabilities:
+
+- Broader OCR layout coverage and stronger source-grounded extraction confidence.
+- Evaluation on diverse, consented, manually verified real-world invoice datasets.
+- Model monitoring for drift, data quality, and changing outlier rates.
+- Richer explanations and independently evaluated vendor-pattern features.
+- Secure user authentication and role-based review workflows.
+- Database integration with durable storage and explicit retention policies.
+
+## Author and License
+
+Created by **Akash Shinde** — [GitHub: Akashshinde84](https://github.com/Akashshinde84).
+
+Released under the **MIT License**. See [LICENSE](LICENSE) for the full terms.
