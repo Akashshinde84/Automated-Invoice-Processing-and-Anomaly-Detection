@@ -43,7 +43,7 @@ def configure_tesseract() -> str:
         if not command:
             raise TesseractNotFoundError(
                 f"TESSERACT_CMD points to a missing executable: {override}. "
-                "Set it to the full path of tesseract.exe."
+                "Set it to the installed Tesseract executable, or remove the override to use PATH."
             )
     else:
         command = shutil.which("tesseract")
@@ -57,9 +57,9 @@ def configure_tesseract() -> str:
         if not command:
             raise TesseractNotFoundError(
                 "Tesseract OCR is not installed or could not be found. Install the "
-                "Windows Tesseract executable and English language data, then add "
-                "its folder to PATH or set $env:TESSERACT_CMD = "
-                "'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'. "
+                "Tesseract executable and English language data. On Streamlit Cloud, include "
+                "tesseract-ocr and tesseract-ocr-eng in packages.txt and reboot the app. "
+                "For local installations, add Tesseract to PATH or set TESSERACT_CMD. "
                 "Installing pytesseract alone does not install Tesseract."
             )
     pytesseract.pytesseract.tesseract_cmd = command

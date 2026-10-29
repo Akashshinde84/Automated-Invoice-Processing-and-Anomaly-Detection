@@ -191,7 +191,7 @@ def test_dashboard_navigation_and_reports_downloads():
     assert len(app.get('download_button'))==3
     next(w for w in app.selectbox if w.label=='Navigation').set_value('Upload & Process Invoices').run(timeout=30)
     assert not app.exception
-    assert any(b.label=='Extract invoice fields' and b.disabled for b in app.button)
+    assert any(b.label=='Process Invoices' and b.disabled for b in app.button)
 
 
 def test_dashboard_correction_form_and_settings():

@@ -3,6 +3,7 @@
 from dataclasses import asdict
 import hashlib
 import json
+import logging
 from pathlib import Path
 import sys
 
@@ -11,6 +12,8 @@ import pandas as pd
 from ocr_engine import OCRError, process_invoice
 from parser import Invoice, parse_invoice
 from preprocessing import SUPPORTED_EXTENSIONS
+
+logger = logging.getLogger(__name__)
 
 COLUMNS = ["document_id", "source_file", "source_files", "invoice_number", "invoice_date",
            "vendor_name", "total_amount", "currency", "line_items", "warnings",
@@ -137,6 +140,7 @@ def run_pipeline(sources: list[Path], *, csv_path: Path, processed_dir: Path,
             row.update(invoice_record(invoice))
             row["status"] = "warning" if invoice.warnings else "ok"
         except (OCRError, OSError, ValueError, UnicodeError) as exc:
+            logger.exception('Invoice document extraction failed')
             row.update(invoice_record(Invoice(warnings=[f"Document processing failed: {exc}"])))
             row["status"] = "error"
             print(f"Error: {source.name}: {exc}", file=sys.stderr)

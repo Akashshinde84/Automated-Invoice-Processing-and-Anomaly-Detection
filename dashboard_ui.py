@@ -1,6 +1,7 @@
 """Presentation-only helpers; detection/scoring stay in the existing modules."""
 import hashlib
 import json
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -8,8 +9,10 @@ import streamlit as st
 
 from workflow import (process_uploads, apply_corrections, persist_review, filter_records,
                       currency_vendor_totals, safe_name, rule_frequencies)
-from reporting import csv_report, pdf_report, DISCLAIMER, LIMITATIONS
+from reporting import csv_report, pdf_report, export_frame, DISCLAIMER, LIMITATIONS
 from validator import CORE_FIELDS, text
+
+logger = logging.getLogger(__name__)
 
 
 def invoice_explanation_data(row):
@@ -121,25 +124,25 @@ def current_review(frame):
     return apply_corrections(frame, saved['changes'], reviewed=saved['reviewed']) if saved else frame
 
 
-def review_editor(frame, root):
+def review_editor(frame, root, *, scope='records'):
     if frame.empty:
         st.info('No extracted records are available to review.')
         return
     st.subheader('Review extracted fields')
     st.caption('Corrections create a separate version. Original OCR text, values and warnings are preserved. Core-field review does not certify line items or clear remaining OCR uncertainty.')
-    position = st.selectbox('Correction target', list(range(len(frame))),
+    position = st.selectbox('Correction target', list(range(len(frame))), key=f'{scope}_correction_target',
                             format_func=lambda i:f'{i+1} · {text(frame.iloc[i].get("invoice_number")) or "Unresolved number"} · {safe_name(text(frame.iloc[i].get("source_file")))}')
     effective = current_review(frame)
     row = effective.iloc[position]
-    with st.form('field_corrections'):
+    with st.form(f'{scope}_field_corrections'):
         left,right = st.columns(2)
         values = {}
         for i,(key,label) in enumerate([('invoice_number','Invoice number'),('vendor_name','Vendor'),
                                        ('invoice_date','Invoice date (YYYY-MM-DD)'),('currency','Currency'),
                                        ('total_amount','Total amount (canonical decimal)')]):
             with left if i%2 == 0 else right:
-                values[key] = st.text_input(label, value=text(row.get(key)),key=f'review_{dataset_key(frame)[:12]}_{position}_{key}')
-        verified = st.checkbox('I reviewed these core fields against the original invoice',key=f'review_confirmation_{dataset_key(frame)[:12]}_{position}')
+                values[key] = st.text_input(label, value=text(row.get(key)),key=f'{scope}_review_{dataset_key(frame)[:12]}_{position}_{key}')
+        verified = st.checkbox('I reviewed these core fields against the original invoice',key=f'{scope}_review_confirmation_{dataset_key(frame)[:12]}_{position}')
         submitted = st.form_submit_button('Save review and reanalyze', type='primary')
     if submitted:
         try:
@@ -159,13 +162,13 @@ def review_editor(frame, root):
             st.error('Review could not be saved. Use valid identifiers, ISO dates, currency codes and decimal amounts; check folder permissions.')
 
 
-def upload_page(root):
+def upload_page(root, config=None):
     st.caption('Hosted storage is temporary. Download reviewed results before restarting or leaving the session. Do not upload confidential invoices to a public demonstration.')
     st.subheader('Upload & Process Invoices')
     st.write('PDF, PNG and JPG/JPEG · 10 MB per file · 20 files / 50 MB per batch · PDF limit: 25 pages')
     files = st.file_uploader('Choose invoice PDFs or images', type=['pdf','png','jpg','jpeg'], accept_multiple_files=True)
     st.caption('Files are saved as new copies. OCR output must be reviewed before relying on amounts or dates.')
-    if st.button('Extract invoice fields', type='primary', disabled=not files):
+    if st.button('Process Invoices', type='primary', disabled=not files):
         progress = st.progress(0.0, text='Validating uploads')
         try:
             frame,statuses,run = process_uploads([(file.name,file.getvalue()) for file in files], root,
@@ -174,16 +177,52 @@ def upload_page(root):
             st.session_state.upload_status = statuses
             st.session_state.processed_dataset = run.name
             st.session_state.prefer_processed = True
-            st.success(f'Extraction complete: {len(frame)} unique document records. Review errors/warnings below; choose Dashboard to analyze.')
-        except (ValueError,OSError):
-            st.error('Batch could not be processed. Check the upload limits and workspace permissions.')
+            failed = int(statuses.status.eq('error').sum())
+            if failed:
+                st.warning(f'{failed} file(s) could not be extracted. Review the per-file errors below; failed extractions are not successful invoice results.')
+            if statuses.status.isin(['ok', 'warning']).any():
+                st.success(f'Extraction complete: {len(frame)} unique document records. Analysis and downloads are below.')
+        except ValueError as exc:
+            st.error(str(exc))
+        except PermissionError:
+            logger.exception('Invoice upload batch failed: storage permission denied')
+            st.error('Upload storage is not writable. Locally, stop Streamlit and restart it from a normal terminal with your project environment. On Streamlit Cloud, reboot the app and check temporary-storage permissions. Details are in the server logs.')
+        except OSError:
+            logger.exception('Invoice upload batch failed: storage or persistence error')
+            st.error('The upload batch could not be saved. Check available disk space and temporary-storage access, then retry. Details are in the server logs.')
     if 'upload_status' in st.session_state:
         st.dataframe(st.session_state.upload_status, hide_index=True)
     if 'processed_invoices' in st.session_state:
         frame = st.session_state.processed_invoices
         cols = [c for c in ['invoice_number','vendor_name','invoice_date','currency','total_amount','ocr_mean_confidence','warnings','status'] if c in frame]
-        st.dataframe(frame[cols], hide_index=True)
-        review_editor(frame,root)
+        preview = export_frame(frame)
+        preview['status'] = frame['status']
+        st.dataframe(preview[[c for c in cols if c in preview]], hide_index=True)
+        review_editor(frame,root,scope='uploads')
+        if frame.empty or not frame.status.isin(['ok', 'warning']).any():
+            st.info('No invoices were successfully extracted. Check file errors and try again. No demonstration records are substituted.')
+            return
+        from analysis_config import AnalysisConfig
+        from invoice_analysis import analyze_invoices
+        from workflow import dashboard_data
+        try:
+            result = dashboard_data(analyze_invoices(current_review(frame), config or AnalysisConfig()))
+            st.subheader('Uploaded invoice analysis')
+            st.caption('Rules and duplicate checks use your uploaded records and current sidebar settings. Optional trusted models are available under Invoice Validation → Processed uploads. Anomaly signals are not proof of fraud.')
+            st.dataframe(export_frame(result)[['invoice_number','vendor_name','total_amount','currency','isanomaly',
+                                 'anomalyreason','ocr_review_status','ml_status']], hide_index=True)
+            st.download_button('Download uploaded analysis CSV', csv_report(result),
+                               file_name='uploaded_invoice_analysis.csv', mime='text/csv', key='upload_analysis_csv')
+            if st.button('Prepare uploaded PDF report', key='upload_prepare_pdf'):
+                st.download_button('Download uploaded PDF report',
+                    pdf_report(result, dataset=st.session_state.get('processed_dataset','Uploaded invoices'), model='Rules only'),
+                    file_name='uploaded_invoice_report.pdf', mime='application/pdf', key='upload_pdf')
+        except ImportError:
+            logger.exception('Uploaded invoice reporting dependency unavailable')
+            st.error('Reporting dependencies are missing. Install requirements.txt and restart the application.')
+        except (ValueError, TypeError, OSError, RuntimeError):
+            logger.exception('Uploaded invoice analysis or reporting failed')
+            st.error('Unable to analyze or report this batch. Check extracted fields and server logs; your extraction preview remains available.')
 
 
 def additional_filters(frame):

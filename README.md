@@ -164,14 +164,16 @@ $env:OPENCV_FOR_THREADS_NUM='1'
 
 Open [localhost:8502](http://localhost:8502). A fresh checkout starts with the labeled synthetic demonstration; saved models and generated outputs are not required.
 
+If an updated helper raises `session_storage_root() got an unexpected keyword argument 'temporary'`, stop and restart the Streamlit server to load the current `workflow.py`; refreshing the browser alone can retain an older imported module. On Community Cloud, deploy matching versions of `app.py` and `workflow.py` and reboot the app. Browser upload directories survive ordinary session reruns; restarting the server resets session state, so download needed results first. Temporary files are left for host cleanup rather than deleted during reruns.
+
 ## Application Workflow
 
-1. **Open the workspace.** Explore the synthetic demonstration or select **Upload & Process Invoices** in the sidebar.
-2. **Upload source documents.** Choose supported PDFs/images and click **Extract invoice fields**. Inspect processing status and warnings.
+1. **Open the workspace.** Select the **Invoice Processing** tab. The sidebar's **Upload & Process Invoices** entry points to this same workspace.
+2. **Upload source documents.** Choose multiple PDF, PNG, JPG or JPEG files and click **Process Invoices**. Progress and per-file errors appear while the existing OCR pipeline runs directly on the host; no local commands are needed.
 3. **Review extracted fields.** Compare values with the original document. Save supported corrections in the upload page or **Invoice Records**. Leave uncertain values unresolved.
-4. **Analyze the batch.** Open **Dashboard**; processed uploads become the data source. Validation, duplicate matching, rules, and eligible optional model inference run on the records.
+4. **Analyze the batch.** Review extracted fields and the rules/duplicate analysis below the uploader. In **Invoice Validation**, choose **Processed uploads** for the full dashboard, configured thresholds, and eligible optional trusted model inference. No synthetic records are substituted for failed uploads.
 5. **Investigate findings.** Use **Anomaly Detection** and the invoice explanation selector to inspect reasons, duplicate matches, OCR warnings, and risk contributions.
-6. **Download results.** Apply filters, then use **Reports** for PDF/CSV downloads of filtered or selected records.
+6. **Download results.** Download the uploaded analysis CSV or prepare a PDF in **Invoice Processing**. Use **Invoice Validation → Reports** for filtered or selected records. Anomaly flags indicate review needs, not confirmed fraud.
 
 You can also upload an extracted CSV through **Extracted invoice CSV**. Byte-identical uploaded documents share one extraction record while all source copies are retained. Other duplicate candidates remain separate records for review.
 
@@ -285,7 +287,7 @@ The **0–100 risk score is a heuristic review priority**, distinct from the Iso
 
 **Charts** show risk distributions, priorities, observed amounts, vendor totals, duplicate candidate counts, and rule/validation frequencies. Monetary charts use one currency at a time. **Filters** cover vendor, currency, date range, anomaly status, priority, and OCR review status.
 
-Each invoice explanation includes reasons, point contributions, duplicate details, OCR uncertainty, and suggested manual actions, with optional technical details. The **Invoice Processing** tab also provides CLI guidance.
+Each invoice explanation includes reasons, point contributions, duplicate details, OCR uncertainty, and suggested manual actions, with optional technical details. The **Invoice Processing** tab processes documents directly in the browser; command-line usage remains available under **How to Run**.
 
 ## Project Structure
 
@@ -358,7 +360,11 @@ Deploy through [Streamlit Community Cloud](https://share.streamlit.io/) using th
 
 ### Storage and uploaded invoice privacy
 
-Local mode preserves source copies under `invoices/uploads/` and extraction/review versions under `output/runs/`. Session mode creates a unique OS temporary directory per browser session and disables automatic loading of repository-local extraction CSVs. Reports are generated in memory.
+Browser document uploads always use a unique OS temporary directory per Streamlit session, including in local mode. Original copies and extraction/review versions remain isolated within that temporary directory using platform-independent paths. CLI extraction continues to use the destinations you specify. Session mode also disables automatic loading of repository-local extraction CSVs. Reports are generated in memory.
+
+On Streamlit Community Cloud, keep `tesseract-ocr` and `tesseract-ocr-eng` in `packages.txt`, along with the report fonts. `requirements.txt` supplies `pytesseract`, OpenCV Headless and `pypdfium2`; PDFium handles PDF text extraction and rendering without external Poppler commands. Scanned PDFs and images need Tesseract, while supported digital PDFs can use their text layer. After changing dependencies, reboot/redeploy and inspect the build logs. Remove any Windows `TESSERACT_CMD` override on Linux. A missing OCR tool or corrupt document produces a per-file error; successful files in the same batch remain available for review and download.
+
+If processing reports that upload storage is not writable, check the server traceback. On Windows, launch Streamlit from a normal terminal with the project environment; a restricted execution token can create a temporary directory but be denied access to its children. Restarting outside that restricted context preserves secure temporary-directory permissions; do not grant broad filesystem access or disable upload checks. On Linux/cloud, ensure the host temporary directory is writable by the app account and check disk capacity. Storage setup, CSV persistence, document extraction and reporting failures are logged with tracebacks on the server; browser errors and upload previews redact host paths. Keep server logs private.
 
 Temporary host storage is not durable. Download required results before restarting or leaving; files may remain on the host until recycling. Session isolation does not provide authentication, encryption, or guaranteed deletion. Use synthetic invoices for public demonstrations and establish access control and retention policies before handling confidential records.
 

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from io import BytesIO, StringIO
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -21,12 +22,19 @@ MAX_FILE_BYTES = 10*1024*1024
 MAX_BATCH_BYTES = 50*1024*1024
 MAX_FILES = 20
 ALLOWED = {'.pdf', '.png', '.jpg', '.jpeg'}
+logger = logging.getLogger(__name__)
 
 
-def session_storage_root(root):
-    """Opt-in isolated ephemeral UI storage for multi-user cloud demonstrations."""
+def session_storage_root(root: Path, *, temporary: bool = False) -> Path:
+    """Return configured storage, or force isolated OS-temp storage for uploads.
+
+    Keep the directory path (not a TemporaryDirectory context manager) in
+    session_state so Streamlit reruns cannot clean up active uploads. Local
+    mode returns root unless temporary=True. Temp files remain until host
+    cleanup/recycling; neither reruns nor creating another session delete them.
+    """
     import streamlit as st
-    mode = os.environ.get('INVOICE_STORAGE_MODE')
+    mode = 'session' if temporary else os.environ.get('INVOICE_STORAGE_MODE')
     if mode is None:
         try:
             mode = st.secrets.get('INVOICE_STORAGE_MODE', 'local')
@@ -122,8 +130,12 @@ def process_uploads(uploads, root, progress=None):
     root = Path(root).resolve()
     run = root/'output'/'runs'/f'run_{uuid4().hex}'
     originals = root/'invoices'/'uploads'/run.name
-    originals.mkdir(parents=True, exist_ok=False)
-    run.mkdir(parents=True, exist_ok=False)
+    try:
+        originals.mkdir(parents=True, exist_ok=False)
+        run.mkdir(parents=True, exist_ok=False)
+    except OSError:
+        logger.exception('Invoice upload storage initialization failed')
+        raise
     records, statuses, seen = [], [], {}
     for i, (name, data) in enumerate(uploads):
         label = safe_name(name)
@@ -147,16 +159,23 @@ def process_uploads(uploads, root, progress=None):
                 row['original_filename'] = label
                 records.append(row)
                 seen[digest] = len(records)-1
-                message = ('Extraction failed. Check Tesseract installation, language data and source quality.'
+                message = ('Extraction failed. Check source readability and OCR timeouts. On Streamlit Cloud, install tesseract-ocr and tesseract-ocr-eng through packages.txt and reboot. PDFs use pypdfium2 from requirements.txt; Poppler is not required.'
                            if row['status'] == 'error' else 'Extracted; inspect OCR warnings before analysis.')
                 statuses.append(dict(filename=label, status=row['status'], message=message))
-        except (ValueError, OSError, RuntimeError, MemoryError):
+        except ValueError as exc:
+            statuses.append(dict(filename=label, status='error', message=str(exc)))
+        except (OSError, RuntimeError, MemoryError):
+            logger.exception('Invoice upload file processing failed (file index %d)', i+1)
             statuses.append(dict(filename=label, status='error', message='Unable to process this file. Check type, size, readability and OCR setup.'))
         if progress:
             progress((i+1)/len(uploads), f'Processed {i+1} of {len(uploads)} files')
     result = pd.DataFrame(records, columns=COLUMNS+['original_filename'])
-    write_analysis(result, run/'extracted.csv')
-    (run/'upload_status.json').write_text(json.dumps(statuses, indent=2), encoding='utf-8')
+    try:
+        write_analysis(result, run/'extracted.csv')
+        (run/'upload_status.json').write_text(json.dumps(statuses, indent=2), encoding='utf-8')
+    except OSError:
+        logger.exception('Invoice upload batch persistence failed')
+        raise
     return result, pd.DataFrame(statuses), run
 
 

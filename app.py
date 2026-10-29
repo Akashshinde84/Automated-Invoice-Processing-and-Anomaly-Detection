@@ -43,17 +43,14 @@ def main() -> None:
     style_dashboard()
     try:
         storage_root = session_storage_root(ROOT)
+        upload_storage = session_storage_root(ROOT, temporary=True)
     except (ValueError, OSError):
+        logging.getLogger(__name__).exception('Invoice session storage initialization failed')
         st.error('Unable to initialize invoice storage. Check INVOICE_STORAGE_MODE and temporary-directory permissions.')
         return
     st.title("Automated Invoice Processing and Anomaly Detection")
     st.caption('INVOICE REVIEW WORKSPACE  ·  Extraction / validation / explainable review. Signals are not confirmed fraud.')
     analysis_tab, ocr_tab = st.tabs(['Invoice Validation', 'Invoice Processing'])
-    with ocr_tab:
-        st.subheader('Invoice Processing')
-        st.write('Process invoice images/PDFs with the existing CLI, then upload the extracted CSV in the review tab. Original OCR text and recognition evidence remain available in the output directory.')
-        st.code('.\\.venv\\Scripts\\python.exe main.py .\\invoices --csv output/new_run/invoices.csv --output-dir output/new_run/processed --raw-dir output/new_run/raw_ocr', language='powershell')
-        st.write('Inspect warnings and field_review before accepting extracted numbers, dates or amounts. The historical samples are synthetic invoice fixtures, not business training data.')
     with st.sidebar:
         st.markdown('### Invoice Review')
         page = st.selectbox('Navigation', ['Dashboard','Upload & Process Invoices','Invoice Records','Anomaly Detection','Reports','Settings'])
@@ -69,9 +66,11 @@ def main() -> None:
         config = replace(base, as_of=as_of.isoformat(), vendor_similarity=vendor_similarity,
                          high_amount_limits=limits)
         st.caption('Thresholds are currency-specific. LOW priority does not mean approved. OCR review is separate from the 0–100 heuristic risk score.')
+    with ocr_tab:
+        upload_page(upload_storage, config)
     with analysis_tab:
         if page == 'Upload & Process Invoices':
-            upload_page(storage_root)
+            st.info('Open the Invoice Processing tab to upload, process, review and download invoice results.')
             return
         options = ['Extracted invoice CSV', 'Synthetic demonstration']
         if 'processed_invoices' in st.session_state:
@@ -128,7 +127,7 @@ def main() -> None:
             if model and model.get('feature_profile') == 'vendor_v2':
                 st.warning('Experimental vendor-aware model: it underperformed the numeric baseline on synthetic evaluation. Results are review signals only.')
             if page == 'Invoice Records':
-                review_editor(frame,storage_root)
+                review_editor(frame,upload_storage if source == 'Processed uploads' else storage_root)
             frame = current_review(frame)
             result = dashboard_data(analyze_invoices(frame, config, model))
         except (ValueError, TypeError, OSError) as exc:

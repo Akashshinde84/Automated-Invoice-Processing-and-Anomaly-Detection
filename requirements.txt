@@ -9,6 +9,7 @@ rapidfuzz>=3.9,<4  # Duplicate candidate matching
 streamlit>=1.49,<2
 joblib>=1.4,<2  # Trusted local model persistence
 python-dateutil>=2.9,<3
+# Bundled PDF rendering/text extraction; no external Poppler binary required.
 pypdfium2>=4.30,<6
 # Dashboard charts and PDF reports.
 plotly>=5.24,<7
