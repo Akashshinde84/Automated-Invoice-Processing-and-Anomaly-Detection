@@ -1,5 +1,3 @@
-# Linux OCR executable and English language data for scanned PDFs and images.
 tesseract-ocr
 tesseract-ocr-eng
-# Fonts for downloadable PDF reports. PDF rendering uses pypdfium2, not Poppler.
 fonts-dejavu-core
