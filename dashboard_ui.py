@@ -227,6 +227,14 @@ def charts(frame):
     group=frame[frame.currency==currency].copy()
     group['observed_amount']=pd.to_numeric(group.total_amount,errors='coerce')
     left,right=st.columns(2)
+    plotted=group.dropna(subset=['observed_amount']).copy()
+    plotted['anomaly_status']=plotted['isanomaly'].map({True:'Flagged',False:'Not flagged'})
+    show(px.box(plotted,x='vendor_name',y='observed_amount',points='all',
+                title=f'Vendor amount distribution - {currency}'),left)
+    show(px.scatter(plotted,x='invoice_date',y='observed_amount',color='anomaly_status',
+                    hover_data=['invoice_number','vendor_name'],
+                    title=f'Invoice amounts and outliers - {currency}'),right)
+    left,right=st.columns(2)
     show(px.histogram(group.dropna(subset=['observed_amount']),x='observed_amount',title=f'Observed amounts · {currency}',color_discrete_sequence=['#59b6e8']),left)
     totals=currency_vendor_totals(frame,currency)
     if not totals.empty:

@@ -15,7 +15,8 @@ from preprocessing import SUPPORTED_EXTENSIONS
 COLUMNS = ["document_id", "source_file", "source_files", "invoice_number", "invoice_date",
            "vendor_name", "total_amount", "currency", "line_items", "warnings",
            "page_count", "ocr_mean_confidence", "raw_text_file", "status",
-           "field_review", "recognition_evidence_file"]
+           "field_review", "recognition_evidence_file", "subtotal_amount", "tax_amount",
+           "shipping_amount", "discount_amount"]
 
 
 def discover_sources(source: Path, *, text_input: bool = False) -> list[Path]:
@@ -42,6 +43,8 @@ def invoice_record(invoice: Invoice) -> dict:
             value[key] = str(value[key]) if value[key] is not None else None
         items.append(value)
     return {
+        **{name: str(getattr(invoice, name)) if getattr(invoice, name) is not None else None
+           for name in ('subtotal_amount', 'tax_amount', 'shipping_amount', 'discount_amount')},
         "invoice_number": invoice.invoice_number,
         "invoice_date": invoice.invoice_date.isoformat() if invoice.invoice_date else None,
         "vendor_name": invoice.vendor_name,

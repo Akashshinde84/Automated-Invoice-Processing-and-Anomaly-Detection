@@ -88,6 +88,8 @@ def validate_record(record: dict, config: AnalysisConfig | None = None) -> dict:
         add('invalid_date', 'invoice_date', 'Date must be a valid unambiguous YYYY-MM-DD value.', 15)
     if invoice_date and invoice_date > date.fromisoformat(config.as_of):
         add('future_date', 'invoice_date', f'Invoice date is after analysis date {config.as_of}.', 15)
+    if invoice_date and (date.fromisoformat(config.as_of) - invoice_date).days > config.max_invoice_age_days:
+        add('old_invoice', 'invoice_date', f'Invoice is older than {config.max_invoice_age_days} days as of {config.as_of}.', 10)
     amount = money(record.get('total_amount'))
     nonfinite_literal = (isinstance(record.get('total_amount'), str) and
                          record['total_amount'].strip().casefold() in {'nan', 'infinity', '-infinity', '+infinity'})

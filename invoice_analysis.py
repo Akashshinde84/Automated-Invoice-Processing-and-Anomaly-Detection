@@ -20,7 +20,8 @@ ANALYSIS_COLUMNS = [
     'analysis_id', 'validation_findings', 'arithmetic_status', 'duplicate_flag', 'duplicate_matches',
     'rule_anomaly', 'anomaly_explanations', 'ml_status', 'ml_anomaly', 'ml_decision_score',
     'ml_explanation', 'ml_training_kind', 'risk_score', 'risk_contributions', 'review_priority',
-    'ocr_review_status', 'review_status', 'ocr_warnings', 'analysis_as_of', 'analysis_mode']
+    'ocr_review_status', 'review_status', 'ocr_warnings', 'analysis_as_of', 'analysis_mode',
+    'isanomaly', 'anomalyreason']
 
 
 def priority_for_score(score, config=None):
@@ -91,6 +92,8 @@ def analyze_invoices(invoices: pd.DataFrame, config=None, model=None):
         if not good:
             warnings = [str(record.get('warnings'))]
         output.append(dict(
+            isanomaly=bool(validation_points or rules or matches or ml['anomaly']),
+            anomalyreason='; '.join(explanations),
             analysis_id=f'row-{index+1:06d}', validation_findings=json.dumps(findings),
             arithmetic_status=valid['arithmetic_status'], duplicate_flag=bool(matches),
             duplicate_matches=json.dumps(matches), rule_anomaly=bool(rules or validation_points),

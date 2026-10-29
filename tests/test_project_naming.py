@@ -17,7 +17,8 @@ def test_existing_imports_resolve_to_canonical_implementation(old, new):
 
 def test_readme_has_application_sections_without_development_history():
     readme = (Path(__file__).resolve().parents[1]/'README.md').read_text(encoding='utf-8-sig')
-    assert readme.startswith('# Automated Invoice Processing and Anomaly Detection using Machine Learning')
+    title = 'Automated Invoice Processing and Anomaly Detection using Machine Learning'
+    assert readme.startswith(f'# {title}') or readme.startswith(f'<h1 align="center">{title}</h1>')
     for section in ['Overview', 'Key Features', 'Technologies Used', 'System Architecture',
                     'Installation', 'Configuration', 'How to Run', 'Application Workflow',
                     'Machine Learning Approach', 'Dashboard Features', 'Project Structure',

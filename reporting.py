@@ -16,13 +16,14 @@ LIMITATIONS = ('OCR can misread numbers, dates and amounts. Unverified fields re
                'Synthetic ML performance is not validated real-world fraud detection accuracy. '
                'Experimental vendor-aware models underperform the numeric baseline on the synthetic evaluation. '
                'Missing financial components can prevent total reconciliation; currencies are not converted or combined.')
-PUBLIC_COLUMNS = ['analysis_id','document_id','source_filename','invoice_number','vendor_name','invoice_date',
-                  'currency','total_amount','ocr_mean_confidence','warnings','field_review','validation_status',
+PUBLIC_COLUMNS = ['isanomaly','anomalyreason','analysis_id','document_id','source_filename','invoice_number','vendor_name','invoice_date',
+                  'currency','total_amount','line_items','subtotal_amount','tax_amount','shipping_amount','discount_amount',
+                  'ocr_mean_confidence','warnings','field_review','validation_status',
                   'validation_findings','arithmetic_status','duplicate_flag','duplicate_matches','rule_anomaly',
                   'ml_status','ml_anomaly','ml_decision_score','ml_training_kind','ml_explanation','risk_score',
                   'risk_contributions','review_priority','ocr_review_status','review_status','anomaly_explanations',
                   'analysis_as_of','analysis_mode','user_review_status','original_extracted_values','correction_audit']
-JSON_COLUMNS={'warnings','field_review','validation_findings','duplicate_matches','risk_contributions',
+JSON_COLUMNS={'line_items','warnings','field_review','validation_findings','duplicate_matches','risk_contributions',
               'anomaly_explanations','original_extracted_values','correction_audit'}
 
 

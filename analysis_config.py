@@ -22,6 +22,8 @@ class AnalysisConfig:
     duplicate_date_days: int = 7
     vendor_min_history: int = 5
     vendor_amount_multiplier: float = 4
+    vendor_zscore_threshold: float = 3
+    max_invoice_age_days: int = 90
     low_ocr_confidence: float = 85
     min_training_rows: int = 100
     contamination: float = 0.05
@@ -56,11 +58,13 @@ class AnalysisConfig:
             raise ValueError('contamination must be in (0, 0.5]')
         if not 0 < self.medium_priority < self.high_priority <= 100:
             raise ValueError('Priority thresholds must satisfy 0 < medium < high <= 100')
-        for name, minimum in [('min_training_rows', 20), ('vendor_min_history', 3), ('duplicate_date_days', 0)]:
+        for name, minimum in [('min_training_rows', 20), ('vendor_min_history', 3), ('duplicate_date_days', 0), ('max_invoice_age_days', 0)]:
             if not isinstance(getattr(self, name), int) or getattr(self, name) < minimum:
                 raise ValueError(f'{name} must be an integer >= {minimum}')
         if not 1 < self.vendor_amount_multiplier < 1000:
             raise ValueError('vendor_amount_multiplier must be between 1 and 1000')
+        if not 0 < self.vendor_zscore_threshold < 1000:
+            raise ValueError('vendor_zscore_threshold must be between 0 and 1000')
 
     @classmethod
     def load(cls, path: Path | None = None):

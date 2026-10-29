@@ -199,7 +199,7 @@ def test_same_large_invoice_gets_history_points_only_with_suitable_peers(trained
     large = batch[batch.demo_scenario == 'high_amount'].iloc[0]
     assert large.risk_score == 30 and large.review_priority == 'MEDIUM'
     assert json.loads(large.risk_contributions) == [dict(
-        category='amount_rules', points=30, codes=['high_amount', 'vendor_high_amount'])]
+        category='amount_rules', points=30, codes=['high_amount', 'vendor_zscore', 'vendor_high_amount'])]
     assert 'median 462.50 from 6' in large.anomaly_explanations
     assert not any(c['category'] == 'ml_pattern' for c in json.loads(large.risk_contributions))
 

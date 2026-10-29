@@ -6,6 +6,8 @@
   "duplicate_date_days": 7,
   "vendor_min_history": 5,
   "vendor_amount_multiplier": 4,
+  "vendor_zscore_threshold": 3,
+  "max_invoice_age_days": 90,
   "low_ocr_confidence": 85,
   "min_training_rows": 100,
   "contamination": 0.05,

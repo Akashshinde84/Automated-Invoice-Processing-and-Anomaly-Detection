@@ -32,6 +32,10 @@ class Invoice:
     line_items: list[LineItem] = field(default_factory=list)
     currency: str | None = None
     warnings: list[str] = field(default_factory=list)
+    subtotal_amount: Decimal | None = None
+    tax_amount: Decimal | None = None
+    shipping_amount: Decimal | None = None
+    discount_amount: Decimal | None = None
 
 
 CURRENCY = r"(?:USD|EUR|GBP|INR|CAD|AUD|JPY|CHF|CNY|Rs\.?|[$€£₹¥])"
@@ -190,6 +194,7 @@ def parse_invoice(text: str, *, date_order: str = "auto",
     if decimal_separator not in {None, ".", ","}:
         raise ValueError("decimal_separator must be '.' or ','")
     invoice = Invoice()
+    seen_components = set()
     warnings = invoice.warnings
     text = normalize_text(text)
     lines = [line for line in text.splitlines() if line]
@@ -240,6 +245,20 @@ def parse_invoice(text: str, *, date_order: str = "auto",
             totals.append((rank, amount, _currency_context(currency, document_currency)))
             in_table = False
             continue
+        component = re.fullmatch(r'(subtotal|sub total|tax|vat|gst|shipping|discount)\s*[:=]?\s+(.+)', line, re.I)
+        if component:
+            name = {'subtotal':'subtotal_amount', 'sub total':'subtotal_amount',
+                    'tax':'tax_amount', 'vat':'tax_amount', 'gst':'tax_amount',
+                    'shipping':'shipping_amount', 'discount':'discount_amount'}[component[1].lower()]
+            amount, currency = _amount(component[2], warnings, name, decimal_separator)
+            if currency and _currency_context(currency, document_currency) != document_currency:
+                warnings.append(f'{name}: incompatible or unresolved currency.')
+                amount = None
+            if name in seen_components:
+                warnings.append(f'{name}: repeated component requires review.')
+                amount = None
+            setattr(invoice, name, amount)
+            seen_components.add(name)
         if SUMMARY_RE.match(line):
             in_table = False
             continue

@@ -4,6 +4,7 @@
 <p align="center">OCR extraction · Data validation · Duplicate matching · Machine learning · Interactive reporting</p>
 
 <p align="center">
+  <a href="https://invoice-detection.streamlit.app/"><img src="https://img.shields.io/badge/Live%20Demo-Open%20App-FF4B4B?logo=streamlit&logoColor=white" alt="Live Demo - Open Streamlit App"></a>
   <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
   <img src="https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit dashboard">
   <img src="https://img.shields.io/badge/Tesseract-OCR-166534" alt="Tesseract OCR">
@@ -216,12 +217,28 @@ Replace `INPUT.csv` with your dataset. Real training requires `human_verified=tr
 | Duplicate date window | 7 days |
 | Monetary comparison tolerance | 0.01 |
 | Vendor amount history | At least 5 suitable earlier records; multiplier 4 |
+| Vendor Z-score | Absolute score above 3, using at least 5 earlier distinct eligible invoices in the same currency; zero variance is skipped |
+| Invoice age | Flag more than 90 days old; configurable with `max_invoice_age_days` |
 | Review priority | LOW: 0–24; MEDIUM: 25–59; HIGH: 60–100 |
 | ML training minimum | 100 eligible distinct records per currency |
 
 `--as-of YYYY-MM-DD` fixes the reference date; otherwise the application uses India-local time. Amounts in different currencies are not combined or converted.
 
 ## Machine Learning Approach
+
+Vendor statistical checks include Z-scores against the mean and population standard deviation of earlier eligible invoices for the same vendor and currency. The current invoice is excluded from its reference history. Both unusually low and high amounts can trigger the configurable absolute threshold. Age flags remain review signals and do not alone disqualify otherwise valid records from ML.
+
+### Project deliverables and technical report
+
+Analysis exports include **`isanomaly`** (True/False) and **`anomalyreason`**, alongside separate rule, validation, duplicate and ML findings. The combined flag covers scored validation findings, amount rules, duplicate candidates and ML outliers; OCR review remains separate. Explicit subtotal, tax, shipping and discount fields are extracted from supported labels for reconciliation; missing components remain unknown.
+
+Generate a four-page technical report, freshly extracted sample CSV, synthetic evaluation CSV, and measured accuracy results using a new output directory:
+
+```powershell
+.\.venv\Scripts\python.exe technical_report.py --output-dir output/project_deliverables --as-of 2026-10-29
+```
+
+The report documents parsing, mathematical checks, Isolation Forest rationale, core-field OCR recovery against sample ground truth, and currency-specific box/scatter plots. Tesseract and development dependencies are required. Small authored samples and synthetic evaluation do not establish real-world accuracy. The dashboard also includes box plots by vendor and scatter plots colored by combined anomaly status.
 
 ### Isolation Forest and preprocessing
 
@@ -320,7 +337,13 @@ Streamlit AppTest checks UI behavior; manual browser upload/download checks and 
 
 ## Deployment
 
-Deploy through [Streamlit Community Cloud](https://share.streamlit.io/) using the [official deployment guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy). No verified public deployment URL is provided in this README.
+**The application is deployed on Streamlit Community Cloud.**
+
+**Public application URL:** [https://invoice-detection.streamlit.app/](https://invoice-detection.streamlit.app/)
+
+### Deploy your own instance
+
+Deploy through [Streamlit Community Cloud](https://share.streamlit.io/) using the [official deployment guide](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy).
 
 1. Connect GitHub and select this repository and the branch you intend to deploy.
 2. Set the app entry point to **`app.py`** and select **Python 3.12** in Advanced settings.

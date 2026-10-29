@@ -1,6 +1,6 @@
 """Currency-specific Isolation Forest pipelines and explainable amount rules."""
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from pathlib import Path
 from statistics import median
 import hashlib
@@ -25,7 +25,7 @@ VENDOR_FEATURES = FEATURES + ['vendor_frequency', 'vendor']
 
 def suitable(record, valid):
     """No fitting/scoring unresolved OCR or invalid financial/date records."""
-    issues = [f for f in valid['findings'] if f['points'] > 0]
+    issues = [f for f in valid['findings'] if f['points'] > 0 and f['code'] != 'old_invoice']
     trusted = valid['human_verified'] or text(record.get('data_origin')) == 'synthetic_demo'
     return (trusted and valid['ocr_review_status'] != 'REQUIRED' and not issues
             and valid['amount'] is not None and valid['amount'] > 0 and valid['date'] is not None
@@ -194,6 +194,17 @@ def amount_rules(index, records, validated, config):
             if source_id:
                 seen_sources.add(source_id)
     if len(peers) >= config.vendor_min_history:
+        # Earlier distinct eligible invoices only; keep currencies separate and
+        # exclude the current observation from its own reference distribution.
+        with localcontext() as context:
+            context.prec = 60
+            mean = sum(peers) / len(peers)
+            variance = sum((value - mean) ** 2 for value in peers) / len(peers)
+            if variance > 0:
+                zscore = (amount - mean) / variance.sqrt()
+                if abs(zscore) > Decimal(str(config.vendor_zscore_threshold)):
+                    result.append(dict(code='vendor_zscore', points=20,
+                        message=f'Vendor amount Z-score {zscore:.3f} exceeds absolute threshold {config.vendor_zscore_threshold}; based on {len(peers)} earlier distinct eligible {currency} invoices.'))
         baseline = median(peers)
         if amount > baseline * Decimal(str(config.vendor_amount_multiplier)):
             result.append(dict(code='vendor_high_amount', points=20,
